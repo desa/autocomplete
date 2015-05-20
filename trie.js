@@ -19,18 +19,6 @@ Trie.prototype.addWord = function(word) {
   return this._addWord(word,0);
 };
 
-Trie.prototype._lookup = function(prefix, i) {
-  if (i === prefix.length) {
-    return this.$d;
-  } else {
-    return this[prefix[i]]._lookup(prefix, i+1);
-  }
-};
-
-Trie.prototype.lookup = function(prefix) {
-  return this._lookup(prefix, 0);
-};
-
 
 Trie.prototype.keys = function() {
   var arr = [];
@@ -56,7 +44,7 @@ Trie.prototype.goto = function(prefix) {
   return this._goto(prefix, 0);
 };
 
-Trie.prototype._otherLookup = function() {
+Trie.prototype._lookup = function() {
   var keys = this.keys();
   var arr = !!this.$d ? [this.$d] : [];
   if (keys.length === 0) {
@@ -64,16 +52,20 @@ Trie.prototype._otherLookup = function() {
   } else {
     for (var i = 0; i < keys.length; i++) {
       var branch = this[keys[i]];
-      var words = branch._otherLookup();
+      var words = branch._lookup();
       arr = arr.concat(words);
     }
     return arr;
   }
 };
 
-Trie.prototype.otherLookup = function(prefix) {
+Trie.prototype.lookup = function(prefix) {
   var prefixBranch = this.goto(prefix);
-  return prefixBranch._otherLookup();
+  return prefixBranch._lookup();
+};
+
+Trie.prototype.stringify = function() {
+  return JSON.stringify(this);
 };
 
 
