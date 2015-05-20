@@ -45,6 +45,8 @@ Trie.prototype.keys = function() {
 Trie.prototype._goto = function(prefix, i) {
   if (prefix.length === i) {
     return this;
+  } else if (!(prefix[i] in this)) {
+    return this;
   } else {
     return this[prefix[i]]._goto(prefix, i+1);
   }
