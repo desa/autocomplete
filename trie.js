@@ -37,6 +37,7 @@ Trie.prototype.keys = function() {
   var arr = [];
   for (var key in this) {
     if (key in this.constructor.prototype) continue;
+    if (key === "$d") continue;
     arr.push(key);
   }
   return arr;
@@ -44,9 +45,10 @@ Trie.prototype.keys = function() {
 
 Trie.prototype._goto = function(prefix, i) {
   if (prefix.length === i) {
+    console.log("what is this", i, prefix.length);
     return this;
   } else {
-    return this._goto(prefix, i+1);
+    return this[prefix[i]]._goto(prefix, i+1);
   }
 };
 
@@ -54,24 +56,28 @@ Trie.prototype.goto = function(prefix) {
   return this._goto(prefix, 0);
 };
 
-Trie.prototype.otherLookup = function(prefix) {
-  var prefixBranch = this.goto(prefix);
-  return prefixBranch._otherLookup();
-};
-
 Trie.prototype._otherLookup = function() {
   var keys = this.keys();
   var arr = [this.$d];
+  console.log(keys);
   if (keys.length === 0) {
     return arr;
   } else {
     for (var i = 0; i < keys.length; i++) {
       var branch = this[keys[i]];
       var words = branch._otherLookup();
-      arr.concat(words);
+      console.log("tis is words",words);
+      var new_words = arr.concat(words);
     }
-    return arr;
+    return new_words;
   }
 };
+
+Trie.prototype.otherLookup = function(prefix) {
+  var prefixBranch = this.goto(prefix);
+  console.log("this is prefixBranch", prefixBranch);
+  return prefixBranch._otherLookup();
+};
+
 
 module.exports = Trie;
