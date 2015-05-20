@@ -1,10 +1,9 @@
 function Trie() {
-  this.$d = [];
 };
 
 Trie.prototype._addWord = function(word,i) {
-  this.$d.push(word);
   if (i == word.length) {
+    this.$d = word;
     //add word to $d
     return this;
   } else if (typeof this[word[i]] === 'object') {
@@ -45,7 +44,6 @@ Trie.prototype.keys = function() {
 
 Trie.prototype._goto = function(prefix, i) {
   if (prefix.length === i) {
-    console.log("what is this", i, prefix.length);
     return this;
   } else {
     return this[prefix[i]]._goto(prefix, i+1);
@@ -58,24 +56,21 @@ Trie.prototype.goto = function(prefix) {
 
 Trie.prototype._otherLookup = function() {
   var keys = this.keys();
-  var arr = [this.$d];
-  console.log(keys);
+  var arr = !!this.$d ? [this.$d] : [];
   if (keys.length === 0) {
     return arr;
   } else {
     for (var i = 0; i < keys.length; i++) {
       var branch = this[keys[i]];
       var words = branch._otherLookup();
-      console.log("tis is words",words);
-      var new_words = arr.concat(words);
+      arr = arr.concat(words);
     }
-    return new_words;
+    return arr;
   }
 };
 
 Trie.prototype.otherLookup = function(prefix) {
   var prefixBranch = this.goto(prefix);
-  console.log("this is prefixBranch", prefixBranch);
   return prefixBranch._otherLookup();
 };
 
