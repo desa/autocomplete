@@ -188,4 +188,7 @@ Trie.prototype.stringify = function() {
 };
 
 // Export the Trie constructor
-module.exports = Trie;
+module.exports.Trie = Trie;
+module.exports.lookup = function(ctx, prefix) {
+  return Trie.prototype.lookup.call(ctx, prefix);
+};
