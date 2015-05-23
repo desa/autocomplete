@@ -3,96 +3,93 @@
 function Trie() {
 };
 
-// Iterative method that takes in a string
-// `word` and and index `i` and adds each
-// character intro the trie. Word boundaries
-// are specified by a truthy valued key `$`
-// in the terminal node.
-Trie.prototype._addWord = function(word,i) {
-  // Grap the current letter
-  var letter = word[i];
+// General method that takes in two functions
+// a step method `step` and a return method
+// `fn`. The `step` determines how the trie
+// is traversed. The application of `fn` is
+// is value that gets returned.
+Trie.prototype.traverse = function(step, fn) {
 
-  // If we've reached the end of the word,
-  // add the word boundary to the terminal node,
-  // otherwise keep traversing the trie, adding
-  // new nodes to the trie appropriately.
-  if (i == word.length) {
-    // use $ word boundary with the simplist
-    // truthy value 1.
-    this.$ = 1;
-  } else if (typeof this[letter] === 'object') {
-    // keep traversing the trie.
-    this[letter]._addWord(word, i+1);
-  } else {
-    // create a new node if you've reached the
-    // end of the trie
-    this[letter] = new Trie();
-    // keep traversing the trie.
-    this[letter]._addWord(word, i+1);
-  }
-  return this;
+  // return a function of a word
+  return function(word) {
+
+    // set's the current position of in
+    // the trie while traversing
+    var _step = this;
+
+    // Iteratively step through the trie
+    // using the `step` method to figure
+    // out what to do next
+    for (var i = 0; i < word.length; i++) {
+
+      // Set the current letter
+      var letter = word[i];
+
+      // change to the next step
+      _step = step.call(this, _step, letter);
+    }
+
+    // return some state based on
+    // the total tree and the current
+    // state of _step
+    return fn.call(this, _step);
+  };
 };
 
-// The addWord method adds a word to the
-// trie by calling the `_addWord` method
-// with index 0.
-Trie.prototype.addWord = function(word) {
-  // Call `#_addWord` method starting with index 0
-  return this._addWord(word,0);
-};
 
-// Utility method that returns all of the
-// siblings in the trie, excluding the word
-// boundaries and the prototype methods.
+// Method to add a word to the trie
+// uses the `#traverse` method
+Trie.prototype.addWord = (function() {
+  var step = function(t, l) {
+    t[l] = t[l] || new Trie();
+    return t[l];
+  };
+
+  var fn = function(t) {
+    t.$ = 1;
+    return this;
+  };
+
+  var traverse = Trie.prototype.traverse;
+
+  return traverse.call(this,step,fn);
+})();
+
+// Method to go to a certain prefix
+// in the trie uses the `#traverse` method
+Trie.prototype.goto = (function() {
+  var step = function(t,l) {
+    return !!t[l] ? t[l] : null;
+  };
+
+  var fn = function(t) {
+    return t;
+  };
+
+  var traverse = Trie.prototype.traverse;
+
+  return traverse.call(this,step,fn);
+})();
+
+//// Utility method that returns all of the
+//// siblings in the trie, excluding the word
+//// boundaries and the prototype methods.
 Trie.prototype.keys = function() {
   // Initialize the array of keys to be
-  var arr = [];
+  var letters = [];
 
   // Iterate through all of the keys in an object
   for (var key in this) {
     // Exclude the prototype methods
-    if (key in this.constructor.prototype) continue;
-
     // Exclude the word boundaries
-    if (key === "$") continue;
+    if (key in this.constructor.prototype || key === "$") continue;
 
     // Add key to the array of keys
-    arr.push(key);
+    letters.push(key);
   }
 
   // Return the array of keys
-  return arr;
-};
-
-// Utility method that iteratively traverses
-// the trie, and returns the sub trie found
-// under the prefix passed in.
-Trie.prototype._goto = function(prefix, i) {
-
-  // If we've reached the end of the prefix
-  // return the trie.
-  // If there's no trie in found for that
-  // prefix return null, otherwise keep
-  // traversing the trie.
-  if (prefix.length === i) {
-
-    // return the trie
-    return this;
-  } else if (!(prefix[i] in this)) {
-
-    // no prefix found. return null
-    return null;
-  } else {
-
-    // recursively traverse trie
-    return this[prefix[i]]._goto(prefix, i+1);
-  }
-};
-
-// the `goto` method calls the `goto` method
-// starting with index 0.
-Trie.prototype.goto = function(prefix) {
-  return this._goto(prefix, 0);
+  return letters;
 };
 
 // The method builds up an array of words
@@ -105,7 +102,7 @@ Trie.prototype._lookup = function(suffix) {
 
   // get all siblings at the current level
   // of the trie
-  var keys = this.keys();
+  var keys = Trie.prototype.keys.call(this);
 
   // If there is a word boundary create
   // an array with what ever the current
@@ -150,7 +147,7 @@ Trie.prototype._lookup = function(suffix) {
       // recursively call `_lookup` on the
       // branch. `_lookup` will return an
       // empty array, or an array of suffixes
-      var sfxs = branch._lookup(newSuffix);
+      var sfxs = Trie.prototype._lookup.call(branch, newSuffix);
 
       // add the suffixes to the total array of suffixes
       arr = arr.concat(sfxs);
@@ -170,7 +167,7 @@ Trie.prototype._lookup = function(suffix) {
 Trie.prototype.lookup = function(prefix) {
 
   // Go to that position in the trie
-  var prefixBranch = this.goto(prefix);
+  var prefixBranch = Trie.prototype.goto.call(this,prefix);
 
   // if there's not a prefixBranch return
   // an empty array
@@ -178,7 +175,7 @@ Trie.prototype.lookup = function(prefix) {
 
   // find all of the suffixes with a
   // word boundary
-  var sfxs = prefixBranch._lookup();
+  var sfxs = Trie.prototype._lookup.call(prefixBranch);
 
   // add the prefix to each suffix in the suffixes array
   return sfxs.map(function(sfx) { return prefix + sfx; });
