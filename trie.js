@@ -3,7 +3,7 @@ function Trie() {
 
 Trie.prototype._addWord = function(word,i) {
   if (i == word.length) {
-    this.$ = word;
+    this.$ = 1;
     //add word to $
     return this;
   } else if (typeof this[word[i]] === 'object') {
@@ -34,7 +34,7 @@ Trie.prototype._goto = function(prefix, i) {
   if (prefix.length === i) {
     return this;
   } else if (!(prefix[i] in this)) {
-    return this;
+    return null;
   } else {
     return this[prefix[i]]._goto(prefix, i+1);
   }
@@ -44,15 +44,19 @@ Trie.prototype.goto = function(prefix) {
   return this._goto(prefix, 0);
 };
 
-Trie.prototype._lookup = function() {
+Trie.prototype._lookup = function(suffix) {
   var keys = this.keys();
-  var arr = !!this.$ ? [this.$] : [];
+  var arr = !!this.$ ?
+    Array.prototype.slice.call(arguments) : [];
   if (keys.length === 0) {
     return arr;
   } else {
     for (var i = 0; i < keys.length; i++) {
-      var branch = this[keys[i]];
-      var words = branch._lookup();
+      var letter = keys[i];
+      var branch = this[letter];
+      var sfx = suffix || "";
+      var newSuffix = sfx + letter;
+      var words = branch._lookup(newSuffix);
       arr = arr.concat(words);
     }
     return arr;
@@ -61,7 +65,9 @@ Trie.prototype._lookup = function() {
 
 Trie.prototype.lookup = function(prefix) {
   var prefixBranch = this.goto(prefix);
-  return prefixBranch._lookup();
+  if (!prefixBranch) return [];
+  var sfxs = prefixBranch._lookup();
+  return sfxs.map(function(sfx) { return prefix + sfx; });
 };
 
 Trie.prototype.stringify = function() {
