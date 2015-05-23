@@ -14,4 +14,5 @@ console.log("hea",ex.lookup("hea"));
 console.log("hed",ex.lookup("hed"));
 console.log("l",ex.lookup("l"));
 console.log("d", ex.lookup("d"));
+console.log(ex);
 console.log(ex.stringify());

@@ -3,8 +3,8 @@ function Trie() {
 
 Trie.prototype._addWord = function(word,i) {
   if (i == word.length) {
-    this.$d = word;
-    //add word to $d
+    this.$ = word;
+    //add word to $
     return this;
   } else if (typeof this[word[i]] === 'object') {
     return this[word[i]]._addWord(word, i+1);
@@ -24,7 +24,7 @@ Trie.prototype.keys = function() {
   var arr = [];
   for (var key in this) {
     if (key in this.constructor.prototype) continue;
-    if (key === "$d") continue;
+    if (key === "$") continue;
     arr.push(key);
   }
   return arr;
@@ -46,7 +46,7 @@ Trie.prototype.goto = function(prefix) {
 
 Trie.prototype._lookup = function() {
   var keys = this.keys();
-  var arr = !!this.$d ? [this.$d] : [];
+  var arr = !!this.$ ? [this.$] : [];
   if (keys.length === 0) {
     return arr;
   } else {
