@@ -1,4 +1,4 @@
-var autocomplete = require('./trie');
+var autocomplete = require('../src/trie');
 var Trie = autocomplete.Trie;
 
 var ex = new Trie();
