@@ -56,8 +56,8 @@ Trie.prototype._lookup = function(suffix) {
       var branch = this[letter];
       var sfx = suffix || "";
       var newSuffix = sfx + letter;
-      var words = branch._lookup(newSuffix);
-      arr = arr.concat(words);
+      var sfxs = branch._lookup(newSuffix);
+      arr = arr.concat(sfxs);
     }
     return arr;
   }
